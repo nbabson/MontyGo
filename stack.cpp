@@ -26,28 +26,46 @@ stack::~stack()
    }
 }
 
-void stack::push(int board[][9])
+void stack::push(piece board[][11], bool koFlag, int koMove[])
 {
    node* temp = new node;
-   for (int i = 0; i < 9; ++i)
-      for (int j = 0; j < 9; ++j)
-	 temp -> board[i][j] = board[i][j];
+   for (int i = 0; i < 11; ++i)
+      for (int j = 0; j < 11; ++j)
+      {
+	 temp -> board[i][j].color = board[i][j].color;
+	 temp -> board[i][j].groupNum = board[i][j].groupNum;
+      }
    temp -> next = top;
    top = temp;
+   temp -> koFlag = koFlag;
+   if (koFlag)
+   {
+      temp -> koMove[0] = koMove[0];
+      temp -> koMove[1] = koMove[1];
+   }
 }
 
 
-void  stack::pop(int board[][9])
+void  stack::pop(piece board[][11], bool &koFlag, int koMove[])
 {
    node* temp = top;
    
    if (!top)
       return;
-   for (int i = 0; i < 9; ++i)
-      for (int j = 0; j < 9; ++j)
-	 board[i][j] = temp -> board[i][j];
-  top = temp -> next;
-  delete temp;
+   for (int i = 0; i < 11; ++i)
+      for (int j = 0; j < 11; ++j)
+      {
+	 board[i][j].color = temp -> board[i][j].color;
+	 board[i][j].groupNum = temp -> board[i][j].groupNum;
+      }
+   koFlag = temp -> koFlag;
+   if (koFlag)
+   {
+      koMove[0] = temp -> koMove[0];
+      koMove[1] = temp -> koMove[1];
+   }
+   top = temp -> next;
+   delete temp;
 }
 
       

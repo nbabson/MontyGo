@@ -9,13 +9,23 @@
    to hold board positions so that the progress of a 9x9 go game can
    be recorded.
 */
+
 #include <iostream>
 using namespace std;
 
+struct piece
+{
+   int color; // 0 = empty, 1 = black, 2 = white, 3 = border
+   int groupNum;
+   bool visited;
+};
+
 struct node
 {
-   int board[9][9];
+   piece board[11][11];
    node* next;
+   bool koFlag;
+   int koMove[2];
 };
 
 class stack
@@ -23,11 +33,12 @@ class stack
    public:
       stack();
       ~stack();
-      void push(int board[][9]);
-      void pop(int board[][9]);
+      void push(piece board[][11], bool koFlag, int koMove[]);
+      void pop(piece board[][11], bool &koFlag, int koMove[]);
    private:
       node* top;
 };
+
 
 
 
