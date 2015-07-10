@@ -39,8 +39,11 @@ int main()
       }
       else if (move[0] != 'q')
       {
-         if (!board.move((int)move[0] - 96,(int)move[1] - 48, color))
-            cout << "Invalid move\n";
+	 if (!board.move((int)move[0] - 96,(int)move[1] - 48, color))
+	 {
+	    cout << "Invalid move\n";
+	    color = (color + 1) % 2;
+	 }
 	 else
 	    passFlag = false;
       }
