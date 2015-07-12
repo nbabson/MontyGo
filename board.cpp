@@ -68,7 +68,6 @@ gameBoard::gameBoard()
       pieces[i][0].color = 3;
       pieces[i][10].color = 3;
    }
-   history.push(pieces, koFlag, koMove);
    numString = 0;
    dead[0] = dead[1] = 0;
    koFlag = false;
@@ -77,10 +76,7 @@ gameBoard::gameBoard()
 
 void gameBoard::undo()
 {
-   history.pop(pieces, koFlag, koMove);   
-   if (undoFlag) 
-      history.pop(pieces, koFlag, koMove); 
-   undoFlag = false;
+   history.pop(pieces, koFlag, koMove); 
 }
 
 
@@ -99,9 +95,8 @@ int gameBoard::move(int x, int y, int &color)
     if (!addGroup(x, y, color + 1))
        return 0;
 	  
-    pieces[x][y].color = color + 1;
     history.push(pieces, koFlag, koMove);
-    undoFlag = true;
+    pieces[x][y].color = color + 1;
     return 1;
 }
 
@@ -145,7 +140,7 @@ void gameBoard::resetFlags()
 
 
 
-// Checks the neoghbors of a stone that has been played to find out if any groups have died and if the move is legal.
+// Checks the neighbors of a stone that has been played to find out if any groups have died and if the move is legal.
 int gameBoard::addGroup(int x, int y, int color)
 {
    pieces[x][y].groupNum = ++numString;
