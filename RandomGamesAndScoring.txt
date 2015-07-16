@@ -1,0 +1,89 @@
+﻿Weird file structure nessecary.
+ 
+Colors
+White=1
+Black=-1
+Empty=0
+ 
+randomPlayout(board b,color c){
+     int p=0, t=0;
+     Slist moves;
+     int x;
+     int y;
+     while(p<2){
+          while(t<6 || b.move<30){ //make no more than 6 tries for a legal move after move 30  
+x=rand(1,9);
+               y=rand(1,9);
+              If(b.pos(x,y)!=0 && b.suicide(x,y,c)==0 &&b.ko(x,y)==0){ // or if b.legalmove(x,y)
+                   moves.add(x,y,c);
+                   b.play(x,y,c);
+                   c=-c;
+                   p=0;
+                   t=0; 
+              }else{ t++;}
+          }
+          Moves.add(c,pass);
+          b.pass(c,pass);
+          p++;
+     }
+     Moves.score=b.score();
+     Return moves;
+}
+ 
+Int Score(){
+     Int w=0; //scoring for white because b is already the board
+     b.fill();
+     For(int x=1;x<10;x++)
+          For(int y=1;y<10;y++)
+              W+=this.pos(x,y)
+                   
+     
+}
+Void fill(){
+     //pseudocode 
+     Find all stones with liberties put them in a list or array or w/e.
+     For each element in list, 
+          Remove it then
+          Make free liberties the same color and put at end of list //free liberty has no enemy color around it (4 checks) 
+     //this does have a few problems where order matters maybe making it recursive could fix that? 
+//Mark liberties then color the marks then start through the list again.
+ 
+}
+ 
+Slist{
+     Int score;
+     Node * head;
+     Node * tail;
+}
+Node{
+     Int x
+     Int y
+     Node * next;
+}
+MCTS(board b,color c){
+     MCTree t;
+     t.init();
+     board n;
+     while(thinking()){
+     //explore
+          n=copy(b);
+          t.add(randomPlayout(n,c));
+     //examine
+          n=copy(t.bestboard());
+          t.add(randomPlayout(n,-c));//
+     }
+     Return t.bestmove();
+}
+ 
+// not sure about proper data structure for the tree?
+ 
+Tree{
+     MCTN * root;
+     MCTN * best;
+}
+MCTN{
+     MCTN * parent;
+     List (MCTN*) children;
+     Slist* game
+}
+
