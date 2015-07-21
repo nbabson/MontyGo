@@ -14,45 +14,61 @@ using namespace std;
 
 const bool DEBUG = true;
 
+
 int main()
 {
    char move[3];
-   int color = 0;
+   int color = 1;
    gameBoard board;
    bool passFlag = false; 
+   int choice;
 
-   do
+   cout << "1. Random computer game\n";
+   cout << "2. Human two player game\n";
+   cout << "Choose: ";
+   cin >> choice;
+   if (cin.fail())
+      cin.clear();
+   cin.ignore(10, '\n');
+   if (choice == 2)
    {
-      board.draw();
-      cout << "Enter a move (i.e. g3, p=pass, u=undo, q=quit) : ";
-      cin.get(move, 10, '\n');
-      if (cin.fail())
-	 cin.clear();
-      cin.ignore(10, '\n');
-      if (move[0] == 'u')    
-	 board.undo();
-      else if (move[0] == 'p')
+      do
       {
-	 if (passFlag)
-	    move[0] = 'q';
-	 passFlag = true;
-      }
-      else if (move[0] != 'q')
-      {
-	 if (!board.move((int)move[0] - 96,(int)move[1] - 48, color))
+	 board.draw();
+	 cout << "Enter a move (i.e. g3, p=pass, u=undo, q=quit) : ";
+	 cin.get(move, 10, '\n');
+	 if (cin.fail())
+	    cin.clear();
+	 cin.ignore(10, '\n');
+	 if (move[0] == 'u')    
+	    board.undo();
+	 else if (move[0] == 'p')
 	 {
-	    cout << "Invalid move\n";
-	    color = (color + 1) % 2;
+	    if (passFlag)
+	       move[0] = 'q';
+	    passFlag = true;
 	 }
-	 else
-	    passFlag = false;
+	 else if (move[0] != 'q')
+	 {
+	    if (!board.move((int)move[0] - 96,(int)move[1] - 48, color))
+	    {
+	       cout << "Invalid move\n";
+	       color *= -1;
+	    }
+	    else
+	       passFlag = false;
+	 }
+	 color *= -1;
       }
-      color = (color + 1) % 2;
+      while (move[0] != 'q');
+      board.score();
    }
-   while (move[0] != 'q');
+   else 
+   {
+      randomGame();
+   }
    return 0;
 }
-
 
 
 // Constructor
@@ -88,15 +104,17 @@ int gameBoard::move(int x, int y, int &color)
     if (pieces[x][y].color)
        return 0;
     if (koFlag)
+    {
        if (x == koMove[0] && y == koMove[1])
 	  return 0;    
        else 
 	  koFlag = false;
-    if (!addGroup(x, y, color + 1))
+    }
+    if (!addGroup(x, y, color))
        return 0;
 	  
     history.push(pieces, koFlag, koMove);
-    pieces[x][y].color = color + 1;
+    pieces[x][y].color = color;
     return 1;
 }
 
@@ -173,7 +191,7 @@ void gameBoard::killGroup(int groupNum, int color)
 
    if (deadStones == 1)
       koFlag = true;
-   dead[color - 1] += deadStones;
+   dead[(color - 1) / -2 ] += deadStones;
 }
 
 
@@ -230,11 +248,11 @@ int gameBoard::checkNeighbor(int x, int y, int color)
 // Recursive function assigns new group number to all stones of a connected group. 
 // 0 is returned if the group has no liberties, indicating an illegal move.
 int gameBoard::numberGroup(int x, int y, int color)
-{
-   if (pieces[x][y].color == 0)
-      return 1;
+{ 
    if (pieces[x][y].color == 3 || pieces[x][y].visited) 
       return 0;
+   if (pieces[x][y].color == 0)
+      return 1;
    if (pieces[x][y].color == color)
    {
       pieces[x][y].visited = true;

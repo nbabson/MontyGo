@@ -9,7 +9,8 @@
    to hold board positions so that the progress of a 9x9 go game can
    be recorded.
 */
-
+#include <time.h>        // time
+#include <stdlib.h>      // abs()
 #include <iostream>
 using namespace std;
 
