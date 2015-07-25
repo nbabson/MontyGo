@@ -25,7 +25,7 @@
    are treated as pieces.  Each players territorial points are added to their captured pieces count and a 
    final score is displayed.
    */
-void gameBoard::score()
+bool gameBoard::score(bool display)
 {
    bool done;           // No more territory to be found
    int neighborColor;   // Color of a group adjoining an empty space
@@ -112,14 +112,17 @@ void gameBoard::score()
 		  pieces[i][j].color = neighborColor;
 		  done = false;
 	       }
-
 	    }
 	 }
       }
       ++generation;
    }
    while (!done);
-   drawScored();
+   if (display)
+      drawScored();
+   if (dead[1] - dead[0] > 0)
+      return true;
+   return false;
 }
 
 
@@ -163,29 +166,44 @@ void gameBoard::drawScored()
 //Plays a random game between two computer players.  If a player attempts to
 //make an illegal move 6 times in a row she passes.  If both players pass
 //in succession the game ends.
-void randomGame()
+bool randomGame(gameBoard board, moves_t moves, int color, bool display)
 {
-   int color = 1;
+   int x, y;
    int misses, move = 0;
-   gameBoard board;
+//   gameBoard board;
    bool passFlag = false; 
    bool done = false;
 
-   srand(time(NULL));
    do
    {
-      cout << "Move " << move << endl;
-      board.draw();
+      if (display)
+      {
+         cout << "Move " << move << endl;
+         board.draw();
+      }
       misses = 0;
       do
       {
-	 if (board.move((rand() % 9) + 1, (rand() % 9) + 1, color))
+	 x = (rand() % 9) + 1; 
+	 y = (rand() % 9) + 1;
+	 if (board.move(x, y, color))
 	 {
+	    if (move < 5)
+	    {
+	       moves.x[move] = x;
+	       moves.y[move] = y;
+	    }
 	    passFlag = false;
+	    ++move;
 	    break;
 	 }
 	 else
 	 {
+	    if (move < 5)
+	    {
+	       moves.x[move] = 0;
+	       moves.y[move] = 0;
+	    }
 	    misses += 1;
 //	    cout << "Invalid move\n";
 	 }
@@ -197,12 +215,12 @@ void randomGame()
 	       passFlag = true;
 	    break;
 	 }
+         ++move;
       }
       while (misses < 6);
-      ++move;
       color *= -1;
    }
    while (!done);
-   board.score();
+   return board.score(display);
 }
 

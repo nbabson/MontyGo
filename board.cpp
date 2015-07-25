@@ -12,8 +12,9 @@
 #include "board.h"
 using namespace std;
 
+bool buildGroup;     // This flag is used to distinguish snapbacks from kos.
 const bool DEBUG = true;
-
+const int GAMES = 100000;
 
 int main()
 {
@@ -22,9 +23,14 @@ int main()
    gameBoard board;
    bool passFlag = false; 
    int choice;
+   moves_t moves[1000];
+   int wins;
 
-   cout << "1. Random computer game\n";
+   srand(time(NULL));
+   cout << "1. Random computer game\n";    //Time GAMES random games
    cout << "2. Human two player game\n";
+   cout << "3. Try out a move\n";          //Try 1000 playouts from an initial move
+   cout << "4. Play against dumb game\n";  //Play against brute force algorithm
    cout << "Choose: ";
    cin >> choice;
    if (cin.fail())
@@ -61,12 +67,25 @@ int main()
 	 color *= -1;
       }
       while (move[0] != 'q');
-      board.score();
+      board.score(true);
    }
-   else 
+   else if (choice == 1)
    {
-      randomGame();
+      clock_t t;
+      t = clock();
+      for (int i = 0; i < GAMES; ++i)
+         randomGame(board, moves[0], 1, false);
+      t = clock() - t;
+      cout << "Time elapsed: " << ((float) t) / CLOCKS_PER_SEC << " seconds to play " << GAMES << " games.\n";
    }
+   else if (choice ==3) 
+   {
+      wins = board.tryMove(5, 5, moves);    
+      cout << "Number of wins: " << wins << endl;
+
+   }
+   else
+      dumbGame();
    return 0;
 }
 
@@ -76,13 +95,20 @@ gameBoard::gameBoard()
 {
    for (int i = 1; i < 10; ++i)
       for(int j = 1; j < 10; ++j) 
+      {
 	 pieces[i][j].color = 0;
+	 pieces[i][j].groupNum = 0;
+      }
    for (int i = 0; i < 11; ++i)
    {
       pieces[0][i].color = 3;
       pieces[10][i].color = 3;
       pieces[i][0].color = 3;
       pieces[i][10].color = 3;
+      pieces[0][i].groupNum = -1;
+      pieces[10][i].groupNum = -1;
+      pieces[i][0].groupNum = -1;
+      pieces[i][10].groupNum = -1;
    }
    numString = 0;
    dead[0] = dead[1] = 0;
@@ -97,7 +123,7 @@ void gameBoard::undo()
 
 
 // Returns 0 if the player attempts to make an illegal move.
-int gameBoard::move(int x, int y, int &color)
+int gameBoard::move(int x, int y, int color)
 {
     if (x < 1 || x > 9 || y < 1 || y > 9)
        return 0;
@@ -113,7 +139,7 @@ int gameBoard::move(int x, int y, int &color)
     if (!addGroup(x, y, color))
        return 0;
 	  
-    history.push(pieces, koFlag, koMove);
+ //   history.push(pieces, koFlag, koMove);
     pieces[x][y].color = color;
     return 1;
 }
@@ -161,10 +187,26 @@ void gameBoard::resetFlags()
 // Checks the neighbors of a stone that has been played to find out if any groups have died and if the move is legal.
 int gameBoard::addGroup(int x, int y, int color)
 {
+   int g1, g2, g3, g4;
+   int total;
+
+   g1 = pieces[x+1][y].groupNum;   
+   g2 = pieces[x-1][y].groupNum;  
+   g3 = pieces[x][y-1].groupNum;   
+   g4 = pieces[x][y+1].groupNum;  
    pieces[x][y].groupNum = ++numString;
    resetFlags();
+   buildGroup = false;
    pieces[x][y].visited = true;
-   return checkNeighbor(x+1, y, color) + checkNeighbor(x-1, y, color) + checkNeighbor(x, y-1, color) + checkNeighbor(x, y+1, color);
+   total = checkNeighbor(x+1, y, color);
+   if (pieces[x-1][y].color == color || pieces[x-1][y].color == 0 || g1 != g2)
+      total += checkNeighbor(x-1, y, color);
+   if (pieces[x][y-1].color == color || pieces[x][y-1].color == 0 || (g3 != g1 && g3 != g2))
+      total += checkNeighbor(x, y-1, color);
+   if (pieces[x][y+1].color == color || pieces[x][y+1].color == 0 || (g4 != g1 && g4 != g2 && g4 != g3))
+      total += checkNeighbor(x, y+1, color);
+   return total;
+//   return checkNeighbor(x+1, y, color) + checkNeighbor(x-1, y, color) + checkNeighbor(x, y-1, color) + checkNeighbor(x, y+1, color);
 }
 
 
@@ -187,9 +229,10 @@ void gameBoard::killGroup(int groupNum, int color)
 	    }
 	    ++deadStones;
 	    pieces[i][j].color = 0;
+	    pieces[i][j].groupNum = 0;
 	 }
 
-   if (deadStones == 1)
+   if (deadStones == 1 && !buildGroup)
       koFlag = true;
    dead[(color - 1) / -2 ] += deadStones;
 }
@@ -206,7 +249,7 @@ int gameBoard::checkLiberties(int x, int y, int color)
       return 1;
    if (pieces[x][y].color != color || pieces[x][y].visited)
    {
-      pieces[x][y].visited = true;
+     // pieces[x][y].visited = true;
       return 0;
    }
    pieces[x][y].visited = true;
@@ -230,7 +273,7 @@ int gameBoard::checkNeighbor(int x, int y, int color)
    if (pieces[x][y].color == 0)
       return 1;
    if (!pieces[x][y].visited && color != pieces[x][y].color && pieces[x][y].color != 3)
-   {
+   {  
       if (!checkLiberties(x, y, pieces[x][y].color))
       {
 	 killGroup(pieces[x][y].groupNum, pieces[x][y].color);
@@ -248,13 +291,15 @@ int gameBoard::checkNeighbor(int x, int y, int color)
 // Recursive function assigns new group number to all stones of a connected group. 
 // 0 is returned if the group has no liberties, indicating an illegal move.
 int gameBoard::numberGroup(int x, int y, int color)
-{ 
+{
    if (pieces[x][y].color == 3 || pieces[x][y].visited) 
       return 0;
    if (pieces[x][y].color == 0)
       return 1;
    if (pieces[x][y].color == color)
    {
+      buildGroup = true;
+      koFlag = false;   // If the move adds to a group than it doesn't start a ko
       pieces[x][y].visited = true;
       pieces[x][y].groupNum = numString;
       return numberGroup(x-1, y, color) + numberGroup(x+1, y, color) + numberGroup(x, y-1, color) + numberGroup(x, y+1, color);
