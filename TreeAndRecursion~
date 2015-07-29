@@ -1,0 +1,75 @@
+MCTSnode{
+MCTSnode* parent
+int wins
+int losses //not sure if we need to track this
+int games
+MCTSnode*[4] next //keeping the best 4 moves means at most 168600 games played out
+
+board* b // current board
+int color // color of last move (starts white,as black plays first)
+int move // position of last move (can convert with x= (int)move/9 y= move%9)
+}
+
+MCTS (MCTSnode n,int depth){ //simulate games from n and keep the best 4
+if (depth>3) return;
+
+int[4][2] bestmoves =[[0,0],[0,0],[0,0],[0,0]];
+int sum=0;
+int currentmove;
+
+For each legal move m {//including pass
+  sum=0;
+  currentmove=m;
+  make a copy of the board and play m (not n's color);
+  for (int i=0;i<100;i++){   // playing 25 random games would allow
+    result=play a random game; // for 1 level deeper of recursion with the same # of games
+    sum+=(result*color)+1;                      //something to perhaps test
+  }
+  sum=sum/2; //wins=2 loss=0
+  for (int i=0;i<4;i++){
+    if sum>bestmoves[i][0]{ //keep the best 4;
+      swap (sum,bestmoves[i][0]);
+      swap (currentmove,bestmoves[i][1]);
+    }
+  }
+}
+for (int i=0;i<4;i++)//put information in n's children
+  n.next[i].wins=bestmoves[i][0]; 
+  n.next[i].move=bestmoves[i][1];
+  n.next[i].b=n.b.move(bestmoves[i][1]);
+  n.next[i].parent=n;
+  n.next[i].games=100;
+  n.next[i].losses=100-bestmoves[i][0];
+  n.next[i].color= -n.color;
+  n.games+=100
+  n.wins+=100-bestmoves[i][0];
+  n.losses+=bestmoves[i][0];
+}
+
+for (int i=0;i<4;i++)
+   MCTS(n.next[i],depth+1); //recursively search children
+
+if n.parent!=null  //update parent
+  n.parent.games+=n.games;
+  n.parent.wins+=n.losses;
+  n.parent.losses+=n.wins;
+}
+//free the entire data structure after our move as there is very little information still relevant
+//by the time we get to our next move.
+
+int MontyGo(board * b, int color){
+  MCTSnode* n=new MCTSnode;
+  n.b=b;
+  n.color= -color; //might not need to negate this?
+  n.parent=null;
+  //n.move= ? //dont need to set this right?
+  MCTS(n,1);
+  int max=-1;
+  int move;
+  for(int i=0;i<4;i++){
+    if n.next[i].wins>max;
+      max=n.next[i].wins;
+      move=n.next[i].move;
+   }
+   return move;
+}
