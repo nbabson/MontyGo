@@ -13,7 +13,6 @@
 using namespace std;
 
 bool buildGroup;     // This flag is used to distinguish snapbacks from kos.
-const bool DEBUG = true;
 const int GAMES = 100000;
 
 int main()
@@ -31,6 +30,7 @@ int main()
    cout << "2. Human two player game\n";
    cout << "3. Try out a move\n";          //Try 1000 playouts from an initial move
    cout << "4. Play against dumb game\n";  //Play against brute force algorithm
+   cout << "5. Play Monte Carlo go\n";
    cout << "Choose: ";
    cin >> choice;
    if (cin.fail())
@@ -78,14 +78,16 @@ int main()
       t = clock() - t;
       cout << "Time elapsed: " << ((float) t) / CLOCKS_PER_SEC << " seconds to play " << GAMES << " games.\n";
    }
-   else if (choice ==3) 
+   else if (choice == 3) 
    {
       wins = board.tryMove(5, 5, moves);    
       cout << "Number of wins: " << wins << endl;
 
    }
-   else
+   else if (choice == 4)
       dumbGame();
+   else 
+      MCgame();
    return 0;
 }
 
@@ -113,6 +115,18 @@ gameBoard::gameBoard()
    numString = 0;
    dead[0] = dead[1] = 0;
    koFlag = false;
+   undoOn = true;
+}
+
+gameBoard::gameBoard(gameBoard *to_copy) 
+{
+   for (int i = 1; i < 10; ++i)
+      for (int j = 1; j < 10; ++j)
+	 this -> pieces[i][j] = to_copy -> pieces[i][j];
+   koFlag = to_copy -> koFlag;
+   koMove[0] = to_copy -> koMove[0];
+   koMove[1] = to_copy -> koMove[1];
+   undoOn = to_copy -> undoOn;
 }
 
 
@@ -138,8 +152,8 @@ int gameBoard::move(int x, int y, int color)
     }
     if (!addGroup(x, y, color))
        return 0;
-	  
- //   history.push(pieces, koFlag, koMove);
+    if (undoOn)	  
+       history.push(pieces, koFlag, koMove);
     pieces[x][y].color = color;
     return 1;
 }
