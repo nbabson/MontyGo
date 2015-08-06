@@ -31,25 +31,27 @@ void gameBoard::MCcheckMoves(MCnode* n, int depth)
 	 n -> move.wins += PLAYOUTS - score;
 	 for (int k = 0; k < 4; ++k)
 	 {
-	    if (score > bestMoves[k].wins)  // Bubble good moves through array
-	    {
+	    if (score > bestMoves[k].wins)  // Bubble good moves through array //This doesn't work
+	    { // if score is better than all the other scores it replaces all of them 
 	       if (k == 0)
 	       {
 		  bestMoves[0].wins = score;
 		  bestMoves[0].x = i;
 		  bestMoves[0].y = j;
+		  //break;
 	       }
 	       else 
 	       {
 		  temp.wins = bestMoves[k].wins;
 		  temp.x = bestMoves[k].x;
 		  temp.y = bestMoves[k].y;
-		  bestMoves[k].wins = bestMoves[k-1].wins;;
+		  bestMoves[k].wins = bestMoves[k-1].wins;; 
 		  bestMoves[k].x = bestMoves[k-1].x;
 		  bestMoves[k].y = bestMoves[k-1].y;;
 		  bestMoves[k-1].wins = temp.wins;
 		  bestMoves[k-1].x = temp.x;
 		  bestMoves[k-1].y = temp.y;
+		  //break;
 	       }
 	    }
 	 }
