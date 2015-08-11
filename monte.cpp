@@ -29,16 +29,17 @@ void gameBoard::MCcheckMoves(MCnode* n, int depth)
       {
 	 score = MCtryMove(i, j, n -> color);
 	 n -> move.wins += PLAYOUTS - score;
+	 n -> games += PLAYOUTS;
 	 for (int k = 0; k < 4; ++k)
 	 {
-	    if (score > bestMoves[k].wins)  // Bubble good moves through array //This doesn't work
-	    { // if score is better than all the other scores it replaces all of them 
+	    if (score > bestMoves[k].wins)  // Bubble good moves through array
+	    { /
 	       if (k == 0)
 	       {
 		  bestMoves[0].wins = score;
 		  bestMoves[0].x = i;
 		  bestMoves[0].y = j;
-		  //break;
+		  
 	       }
 	       else 
 	       {
@@ -51,7 +52,7 @@ void gameBoard::MCcheckMoves(MCnode* n, int depth)
 		  bestMoves[k-1].wins = temp.wins;
 		  bestMoves[k-1].x = temp.x;
 		  bestMoves[k-1].y = temp.y;
-		  //break;
+		  
 	       }
 	    }
 	 }
@@ -77,12 +78,14 @@ void gameBoard::MCcheckMoves(MCnode* n, int depth)
       n -> next[i] -> parent = n;
       n -> next[i] -> games = PLAYOUTS;
       n -> next[i] -> color = -(n -> color);
+      
       n -> games += PLAYOUTS;
+      n -> move.wins += PLAYOUTS - bestMoves[i].wins; //double counts the 4 best, so they effectively have double weight
       // Keep total of black wins
 //      if (n -> color == 1)
   //       n -> move.wins += bestMoves[i].wins;
   //    else 
-	 n -> move.wins += PLAYOUTS - bestMoves[i].wins;
+	 
       if (DEBUG) 
       {
          cout << "Parent's move: " << n->move.x << n->move.y << "      Parents color: " << n->color << "      Parent's wins: " << n->move.wins << endl ;
@@ -107,7 +110,7 @@ void gameBoard::MCcheckMoves(MCnode* n, int depth)
 //Find and play the most successful move from the second row of the tree
 int gameBoard::MCmove()
 {
-   int bestMove, maxWins = -50000;
+   int bestMove, maxWins = -500000;
    MCnode *root = new MCnode(this);
    root -> color = 1;
 
