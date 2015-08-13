@@ -26,11 +26,12 @@ int main()
    int wins;
 
    srand(time(NULL));
+   cout << "\033[2J\033[;H";
+   cout << "Welcome to MonteGo\n";
    cout << "1. Random computer game\n";    //Time GAMES random games
    cout << "2. Human two player game\n";
-   cout << "3. Try out a move\n";          //Try 1000 playouts from an initial move
-   cout << "4. Play against dumb game\n";  //Play against brute force algorithm
-   cout << "5. Play Monte Carlo go\n";
+   cout << "3. Play brute force game\n";  //Play against brute force algorithm
+   cout << "4. Play Monte Carlo go\n";
    cout << "Choose: ";
    cin >> choice;
    if (cin.fail())
@@ -78,13 +79,7 @@ int main()
       t = clock() - t;
       cout << "Time elapsed: " << ((float) t) / CLOCKS_PER_SEC << " seconds to play " << GAMES << " games.\n";
    }
-   else if (choice == 3) 
-   {
-      wins = board.tryMove(5, 5, moves);    
-      cout << "Number of wins: " << wins << endl;
-
-   }
-   else if (choice == 4)
+   else if (choice == 3)
       dumbGame();
    else 
       MCgame();
