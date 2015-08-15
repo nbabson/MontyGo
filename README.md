@@ -42,3 +42,10 @@ file.
 At present the Monte Carlo algorithm does not select good moves, and 
 further testing is required.  The brute force game has some ability
 to capture enemy pieces and may be able to beat a human beginner.
+
+
+8/14/2015
+Latest tweak to the algorithm significantly improved the play of the brute
+force algorithm.  It now can beat human beginners.  Unfortunately this
+development happened the day after the program was demonstrated to
+the open source development class.

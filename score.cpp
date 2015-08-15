@@ -188,26 +188,26 @@ bool randomGame(gameBoard board, moves_t moves, int color, bool display)
 	 y = (rand() % 9) + 1;
 	 if (board.move(x, y, color))
 	 {
-	    if (move < 5)
+/*	    if (move < 5)
 	    {
 	       moves.x[move] = x;
 	       moves.y[move] = y;
-	    }
+	    }    */
 	    passFlag = false;
 	    ++move;
 	    break;
 	 }
 	 else
 	 {
-	    if (move < 5)
+/*	    if (move < 5)
 	    {
 	       moves.x[move] = 0;
 	       moves.y[move] = 0;
-	    }
+	    }   */
 	    misses += 1;
 //	    cout << "Invalid move\n";
 	 }
-	 if (misses == 6)
+	 if (misses == 10)
 	 {
 	    if (passFlag)
 	       done = true;
@@ -215,9 +215,9 @@ bool randomGame(gameBoard board, moves_t moves, int color, bool display)
 	       passFlag = true;
 	    break;
 	 }
-         ++move;
+//         ++move;
       }
-      while (misses < 6);
+      while (misses < 10);
       color *= -1;
    }
    while (!done);
